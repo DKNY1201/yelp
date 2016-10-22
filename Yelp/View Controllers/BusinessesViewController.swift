@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MBProgressHUD
 
 class BusinessesViewController: UIViewController {
 
@@ -29,13 +30,7 @@ class BusinessesViewController: UIViewController {
         
         navigationItem.titleView = searchBar
         
-        Business.search(with: "Thai") { (businesses: [Business]?, error: Error?) in
-            if let businesses = businesses {
-                self.businesses = businesses
-                self.tableView.reloadData()
-
-            }
-        }
+        doSearch(searchText: "Thai")
 
         // Example of Yelp search with more search options specified
         /*
@@ -50,6 +45,17 @@ class BusinessesViewController: UIViewController {
             }
         }
         */
+    }
+    
+    fileprivate func doSearch(searchText: String) {
+        MBProgressHUD.showAdded(to: self.view, animated: true)
+        Business.search(with: searchText) { (businesses: [Business]?, error: Error?) in
+            if let businesses = businesses {
+                self.businesses = businesses
+                MBProgressHUD.hide(for: self.view, animated: true)
+                self.tableView.reloadData()
+            }
+        }
     }
 
 }
@@ -82,24 +88,12 @@ extension BusinessesViewController: UISearchBarDelegate {
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.text = ""
         searchBar.resignFirstResponder()
-        Business.search(with: "") { (businesses: [Business]?, error: Error?) in
-            if let businesses = businesses {
-                self.businesses = businesses
-                self.tableView.reloadData()
-                
-            }
-        }
+        doSearch(searchText: "")
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         //searchSettings.searchString = searchBar.text
         searchBar.resignFirstResponder()
-        Business.search(with: searchBar.text!) { (businesses: [Business]?, error: Error?) in
-            if let businesses = businesses {
-                self.businesses = businesses
-                self.tableView.reloadData()
-                
-            }
-        }
+        doSearch(searchText: searchBar.text!)
     }
 }
