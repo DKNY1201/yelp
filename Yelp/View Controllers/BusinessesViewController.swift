@@ -59,6 +59,13 @@ class BusinessesViewController: UIViewController {
             }
         }
     }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let nextNC = segue.destination as? UINavigationController {
+            let filterVC = nextNC.topViewController as? FiltersViewController
+            filterVC?.delegate = self
+        }
+    }
 
 }
 
@@ -96,6 +103,12 @@ extension BusinessesViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         //searchSettings.searchString = searchBar.text
         searchBar.resignFirstResponder()
+        doSearch()
+    }
+}
+
+extension BusinessesViewController: FiltersViewControllerDelegate {
+    func filtersViewControllerDidUpdate(filtersViewController: FiltersViewController) {
         doSearch()
     }
 }
