@@ -9,9 +9,11 @@
 import Foundation
 
 class BusinessSearchSetting {
-    let term: String?
-    let ll: String?
-    
+    var term: AnyObject?
+    var ll: AnyObject? = "37.785771,-122.406165" as AnyObject?
+    var sort: AnyObject?
+    var categoryFilter: AnyObject?
+    var dealFilter: AnyObject?
     
     static let sharedInstance = BusinessSearchSetting()
 }

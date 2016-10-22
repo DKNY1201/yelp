@@ -16,6 +16,7 @@ class BusinessesViewController: UIViewController {
     let businessCellReuseID = "BusinessCell"
     
     var searchBar: UISearchBar!
+    var searchSetting = BusinessSearchSetting.sharedInstance
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,7 +31,7 @@ class BusinessesViewController: UIViewController {
         
         navigationItem.titleView = searchBar
         
-        doSearch(searchText: "Thai")
+        doSearch()
 
         // Example of Yelp search with more search options specified
         /*
@@ -47,9 +48,10 @@ class BusinessesViewController: UIViewController {
         */
     }
     
-    fileprivate func doSearch(searchText: String) {
+    fileprivate func doSearch() {
+        BusinessSearchSetting.sharedInstance.term = searchBar.text as AnyObject?
         MBProgressHUD.showAdded(to: self.view, animated: true)
-        Business.search(with: searchText) { (businesses: [Business]?, error: Error?) in
+        Business.search() { (businesses: [Business]?, error: Error?) in
             if let businesses = businesses {
                 self.businesses = businesses
                 MBProgressHUD.hide(for: self.view, animated: true)
@@ -88,12 +90,12 @@ extension BusinessesViewController: UISearchBarDelegate {
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.text = ""
         searchBar.resignFirstResponder()
-        doSearch(searchText: "")
+        doSearch()
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         //searchSettings.searchString = searchBar.text
         searchBar.resignFirstResponder()
-        doSearch(searchText: searchBar.text!)
+        doSearch()
     }
 }
