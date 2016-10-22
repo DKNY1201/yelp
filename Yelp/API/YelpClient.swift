@@ -67,7 +67,7 @@ class YelpClient: BDBOAuth1RequestOperationManager {
             parameters["deals_filter"] = deals! as AnyObject?
         }
 
-        print(parameters)
+        print("parameters: \(parameters)")
 
         return self.get("search", parameters: parameters, success: { (operation: AFHTTPRequestOperation, response: Any) in
             if let response = response as? NSDictionary {
