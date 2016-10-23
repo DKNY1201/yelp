@@ -113,16 +113,22 @@ class YelpClient: BDBOAuth1RequestOperationManager {
             parameters["ll"] = ll
         }
         
-        if let sort = settings.sort {
-            parameters["sort"] = sort
+        if settings.sort != "" {
+            parameters["sort"] = settings.sort as AnyObject?
         }
         
         if let categoryFilter = settings.categoryFilter {
-            parameters["category_filter"] = categoryFilter
+            parameters["category_filter"] = categoryFilter as AnyObject?
         }
         
         if let dealFilter = settings.dealFilter {
             parameters["deals_filter"] = dealFilter
+        }
+        
+        if let radiusFilter = settings.radiusFilter {
+            let metersPerMile = 1609.344
+            let radiusFilterMeter = radiusFilter * metersPerMile
+            parameters["radius_filter"] = radiusFilterMeter as AnyObject?
         }
         
         return parameters

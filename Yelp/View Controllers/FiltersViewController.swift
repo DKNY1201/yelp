@@ -20,10 +20,18 @@ class FiltersViewController: UIViewController {
     let sortCellReuseID = "SortbyCell"
     let categoryCellReuseID = "CategoryCell"
     
-    var dealOffer = false
-    var distanceArr = [0.3, 1, 5, 20]
-    var sortbyArr = ["Best match", "Distance", "Rate"]
+    var dealOffer: Bool? = false
+    
+    var distanceArr: [[String:String]] = [["distanceName": "1 mile", "value": "1"], ["distanceName": "5 miles", "value": "5"], ["distanceName": "10 miles", "value": "10"], ["distanceName": "20 miles", "value": "20"]]
+    var distanceSelected = ""
+    
+    var sortbyArr: [[String:String]] = [["sortName": "Best match", "value": "0"], ["sortName": "Distance", "value": "1"], ["sortName": "Rating", "value": "2"]]
+    var sortbySelected = ""
+    
     var categories = getCategories()
+    var switchState = [Int:Bool]()
+    
+    let sectionTitles = ["", "Distance", "Sort By", "Category"]
     
     weak var delegate: FiltersViewControllerDelegate!
     
@@ -32,6 +40,34 @@ class FiltersViewController: UIViewController {
 
         tableView.delegate = self
         tableView.dataSource = self
+        
+        let settings = BusinessSearchSetting.sharedInstance
+        
+        dealOffer = (settings.dealFilter != nil) ? true : false
+        
+        distanceSelected = settings.radiusFilterStored
+        if distanceSelected == "" {
+            distanceSelected = distanceArr[0]["value"]!
+        }
+        
+        sortbySelected = settings.sort
+        if sortbySelected == "" {
+            sortbySelected = sortbyArr[0]["value"]!
+        }
+//        
+//        let categoriesStored = settings.categoryFilter
+//        if let categoryArr = categoriesStored?.components(separatedBy: ",") {
+//            for cat in categoryArr {
+//                for category in categories {
+//                    if cat == category["code"] {
+//                        
+//                    }
+//                }
+//            }
+//        }
+        
+        
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -45,12 +81,28 @@ class FiltersViewController: UIViewController {
 
     @IBAction func onSearch(_ sender: UIBarButtonItem) {
         let settings = BusinessSearchSetting.sharedInstance
+        if dealOffer == false {
+            dealOffer = nil
+        }
         settings.dealFilter = dealOffer as AnyObject?
+        settings.radiusFilter = Double(distanceSelected)
+        settings.radiusFilterStored = distanceSelected
+        settings.sort = sortbySelected
+        
+        var categoriesArr = [String]()
+        if switchState.count > 0 {
+            for (key, _) in switchState {
+                let code = self.categories[key]["code"]
+                categoriesArr.append(code!)
+            }
+        }
+
+        settings.categoryFilter = categoriesArr.joined(separator: ",")
+        
+        
         delegate.filtersViewControllerDidUpdate!(filtersViewController: self)
         dismiss(animated: true, completion: nil)
     }
-    
-   
     
 }
 
@@ -90,10 +142,11 @@ extension FiltersViewController: UITableViewDelegate, UITableViewDataSource {
         case 0:
             return 1
         case 1:
-            return 1
+            return distanceArr.count > 0 ? distanceArr.count : 0
         case 2:
-            return 1
-        case 3: return 1
+            return sortbyArr.count > 0 ? sortbyArr.count : 0
+        case 3:
+            return categories.count > 0 ? categories.count : 0
         default:
             return 0
         }
@@ -105,22 +158,69 @@ extension FiltersViewController: UITableViewDelegate, UITableViewDataSource {
         case 0:
             let cell = tableView.dequeueReusableCell(withIdentifier: dealCellReuseID) as! DealCell
             cell.delegate = self
+            cell.dealSwitch.isOn = dealOffer!
             return cell
-//        case 1:
-//            return 1
-//        case 2:
-//            return 1
-//        case 3: return 1
+        case 1:
+            let cell = tableView.dequeueReusableCell(withIdentifier: distanceCellReuseID) as! DistanceCell
+            let distance = distanceArr[indexPath.row]
+            cell.distanceLabel.text = distance["distanceName"]
+            cell.distanceCheckImage.isHidden = distance["value"] != distanceSelected
+            return cell
+        case 2:
+            let cell = tableView.dequeueReusableCell(withIdentifier: sortCellReuseID) as! SortbyCell
+            let sortby = sortbyArr[indexPath.row]
+            cell.sortbyLabel.text = sortby["sortName"]
+            cell.sortbyCheckImage.isHidden = sortby["value"] != sortbySelected
+            return cell
+        case 3:
+            let cell = tableView.dequeueReusableCell(withIdentifier: categoryCellReuseID) as! CategoryCell
+            let category = categories[indexPath.row]
+            cell.categoryLabel.text = category["name"]
+            cell.categorySwitch.isOn = false
+//            if switchState.count > 0 {
+//                for (key, _) in switchState {
+//                    if (indexPath.row == key) {
+//                        cell.categorySwitch.isOn = true
+//                    } else {
+//                        cell.categorySwitch.isOn = false
+//                    }
+//                }
+//            } else {
+//                cell.categorySwitch.isOn = false
+//            }
+            cell.delegate = self
+            return cell
         default:
             return UITableViewCell()
         }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if (indexPath as NSIndexPath).section == 1 {
+            distanceSelected = distanceArr[(indexPath as NSIndexPath).row]["value"]!
+            tableView.reloadSections(IndexSet(integer: 1), with: .none)
+        } else if (indexPath as NSIndexPath).section == 2 {
+            sortbySelected = sortbyArr[(indexPath as NSIndexPath).row]["value"]!
+            tableView.reloadSections(IndexSet(integer: 2), with: .none)
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return self.sectionTitles[section]
     }
 }
 
 extension FiltersViewController: DealCellDelegate {
     func dealCellDidSwitch(dealCell: DealCell) {
-        print("Deal offer changed...")
         dealOffer = dealCell.dealSwitch.isOn
         tableView.reloadSections(IndexSet(integer: 1), with: .automatic)
+    }
+}
+
+extension FiltersViewController: CategoryCellDelegate {
+    func categoryCell(categoryCell: CategoryCell, didSwitchChange value: Bool) {
+        print("have just switched")
+        let indexPath = tableView.indexPath(for: categoryCell)
+        switchState[(indexPath?.row)!] = value
     }
 }

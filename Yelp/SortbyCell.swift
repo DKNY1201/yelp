@@ -10,9 +10,14 @@ import UIKit
 
 class SortbyCell: UITableViewCell {
 
+    
+    @IBOutlet weak var sortbyLabel: UILabel!
+    @IBOutlet weak var sortbyCheckImage: UIImageView!
+    
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
+        
+        sortbyCheckImage.isHidden = true
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {

@@ -65,6 +65,12 @@ class BusinessesViewController: UIViewController {
             let filterVC = nextNC.topViewController as? FiltersViewController
             filterVC?.delegate = self
         }
+        
+        if let nextVC = segue.destination as? BusinessDetailViewController {
+            let indexPath = tableView.indexPathForSelectedRow
+            let business = businesses?[(indexPath?.row)!]
+            nextVC.business = business
+        }
     }
 
 }

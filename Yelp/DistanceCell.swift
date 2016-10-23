@@ -10,9 +10,12 @@ import UIKit
 
 class DistanceCell: UITableViewCell {
 
+    @IBOutlet weak var distanceLabel: UILabel!
+    @IBOutlet weak var distanceCheckImage: UIImageView!
+    
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
+        distanceCheckImage.isHidden = true
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
